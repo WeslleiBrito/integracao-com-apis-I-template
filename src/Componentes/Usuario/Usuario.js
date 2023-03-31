@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const User = styled.div`
@@ -13,6 +14,42 @@ function Usuario(props) {
   const [email, setEmail] = useState("");
   const [editar, setEditar] = useState(false);
 
+  useEffect(() => {
+
+    const url = `https://us-central1-labenu-apis.cloudfunctions.net/labenusers/users/${props.usuario.id}`
+    axios.get(url, {
+      headers: {"Authorization": "wesllei-brito-ozemela"}
+    })
+    .then((response) => {
+      setUsuario((u) => ({ ...u, email: response.data.email}))
+    }).catch((error) => {
+      console.log(error.response)
+    })
+  },[props.usuario.id])
+
+  const putEditUser = (id) => {
+    const url = `https://us-central1-labenu-apis.cloudfunctions.net/labenusers/users/${id}`
+
+    axios.put(url, {
+      name : nome ? nome : usuario.name,
+      email: email ? email : usuario.email
+    }, {
+      headers: {"Authorization": "wesllei-brito-ozemela"}
+    }).then(() => {
+      setEditar(false)
+
+    }).catch((error) => {
+      console.log(error.response)
+    })
+
+  }
+
+  useEffect(() => {
+   props.getAllUsers() 
+   console.log(usuario)
+  }, [editar])
+
+
   return (
     <User>
       {editar ? (
@@ -21,7 +58,7 @@ function Usuario(props) {
           <p>E-mail: {usuario.email}</p>
           <input value={nome} onChange={(e) => setNome(e.target.value)} />
           <input value={email} onChange={(e) => setEmail(e.target.value)} />
-          <button>Enviar alterações</button>
+          <button onClick={() => putEditUser(usuario.id)}>Enviar alterações</button>
         </div>
       ) : (
         <>
