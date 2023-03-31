@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
+
 
 const User = styled.div`
   border: black 1px solid;
@@ -13,6 +15,38 @@ function Usuario(props) {
   const [email, setEmail] = useState("");
   const [editar, setEditar] = useState(false);
 
+  const putEditUser = (id) => {
+    axios.put(`${props.urlBase}${id}`, {
+      name: nome ? nome : usuario.nome,
+      email: email ? email : usuario.email
+    },
+      {
+        headers: {
+          "Authorization": "wesllei-brito-ozemela"
+        }
+      }
+    ).then(() => {
+      setUsuario({ ...Usuario, name: nome ? nome : usuario.name, email: email ? email : usuario.email })
+      setEditar(false)
+    }).catch((error) => {
+      console.log(error.response)
+    })
+  }
+
+  useEffect(() => {
+    setNome("")
+    setEmail("")
+  }, [editar])
+
+  useEffect(() => {
+    axios.get(`${props.urlBase}${usuario.id}`, { headers: { Authorization: "wesllei-brito-ozemela" } })
+      .then((response) => {
+        setUsuario((u) => ({ ...u, email: response.data.email }))
+      }).catch((error) => {
+        console.log(error.response.data)
+      })
+  }, [])
+
   return (
     <User>
       {editar ? (
@@ -21,7 +55,7 @@ function Usuario(props) {
           <p>E-mail: {usuario.email}</p>
           <input value={nome} onChange={(e) => setNome(e.target.value)} />
           <input value={email} onChange={(e) => setEmail(e.target.value)} />
-          <button>Enviar alterações</button>
+          <button onClick={() => putEditUser(usuario.id)}>Enviar alterações</button>
         </div>
       ) : (
         <>
